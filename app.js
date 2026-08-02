@@ -181,12 +181,21 @@ profitBox.innerHTML =
 
         </div>
 
-        <button onclick="deleteItem(${index})">
+<div style="margin-top:8px;">
 
-        Delete
+<button onclick="editItem(${index})">
 
-        </button>
+✏ Edit
 
+</button>
+
+<button onclick="deleteItem(${index})">
+
+🗑 Delete
+
+</button>
+
+</div>
         `;
 
         list.appendChild(li);
@@ -439,7 +448,39 @@ function deleteItem(index){
 
 }
 
+// ===========================
 
+function editItem(index){
+
+    const item = history[index];
+
+    if(!item){
+        return;
+    }
+
+    const newAmount = parseFloat(
+
+        prompt(
+
+            "Enter new amount:",
+
+            item.amount.toFixed(2)
+
+        )
+
+    );
+
+    if(isNaN(newAmount) || newAmount <= 0){
+
+        return;
+
+    }
+
+    item.amount = newAmount;
+
+    saveData();
+
+}
 
 // ===========================
 

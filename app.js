@@ -15,19 +15,38 @@ JSON.parse(localStorage.getItem("history")) || [];
 
 function updateDisplay(){
 
-    const profit = earnings - fuel;
+  // Recalculate totals from history
 
-    document.getElementById("earnings").innerHTML =
-    "Earnings: $" + earnings.toFixed(2);
+earnings = 0;
+fuel = 0;
 
-    document.getElementById("fuel").innerHTML =
-    "Fuel: $" + fuel.toFixed(2);
+history.forEach(function(item){
 
-    const profitBox =
-    document.getElementById("profit");
+    if(item.type==="earnings"){
 
-    profitBox.innerHTML =
-    "Net Profit: $" + profit.toFixed(2);
+        earnings += item.amount;
+
+    }else{
+
+        fuel += item.amount;
+
+    }
+
+});
+
+const profit = earnings - fuel;
+
+document.getElementById("earnings").innerHTML =
+"Earnings: $" + earnings.toFixed(2);
+
+document.getElementById("fuel").innerHTML =
+"Fuel: $" + fuel.toFixed(2);
+
+const profitBox =
+document.getElementById("profit");
+
+profitBox.innerHTML =
+"Net Profit: $" + profit.toFixed(2);
 
     if(profit >= 0){
 
@@ -378,14 +397,40 @@ function getWeekNumber(date){
 
 // ===========================
 
+// ===========================
+
 function deleteItem(index){
 
-    const item=history[index];
+    const item = history[index];
+
+    if(!item){
+        return;
+    }
+
+    const confirmed = confirm(
+
+        "Delete this transaction?\n\n" +
+
+        item.type.toUpperCase() +
+
+        "\n$" +
+
+        item.amount.toFixed(2)
+
+    );
+
+    if(!confirmed){
+        return;
+    }
 
     if(item.type==="earnings"){
-        earnings-=item.amount;
+
+        earnings -= item.amount;
+
     }else{
-        fuel-=item.amount;
+
+        fuel -= item.amount;
+
     }
 
     history.splice(index,1);
@@ -393,6 +438,8 @@ function deleteItem(index){
     saveData();
 
 }
+
+
 
 // ===========================
 

@@ -29,91 +29,350 @@ function updateDisplay(){
     profitBox.innerHTML =
     "Net Profit: $" + profit.toFixed(2);
 
-    if(profit>=0){
-        profitBox.className="profit";
+    if(profit >= 0){
+
+        profitBox.className = "profit";
+
     }else{
-        profitBox.className="loss";
+
+        profitBox.className = "loss";
+
     }
+
+    // -------------------------
+    // Calculate Week / Month Totals
+    // -------------------------
+
+    let weekGross = 0;
+    let weekFuel = 0;
+
+    let monthGross = 0;
+    let monthFuel = 0;
+
+    const now = new Date();
+
+    const currentWeek =
+    getWeekNumber(now);
+
+    const currentMonth =
+    now.getMonth();
+
+    const currentYear =
+    now.getFullYear();
+
+    // -------------------------
 
     const list =
     document.getElementById("history");
 
-    list.innerHTML="";
+    list.innerHTML = "";
 
     history.forEach(function(item,index){
 
-        const li=document.createElement("li");
+        // Backward compatibility
+        if(!item.date){
 
-        li.innerHTML=`
-        <span>
-        ${item.type==="earnings"?"💵":"⛽"}
-        $${item.amount.toFixed(2)}
-        </span>
+            item.date =
+            now.toISOString().split("T")[0];
+
+        }
+
+        if(!item.time){
+
+            item.time =
+            now.toLocaleTimeString([],{
+
+                hour:"numeric",
+
+                minute:"2-digit"
+
+            });
+
+        }
+
+        const itemDate =
+        new Date(item.date);
+
+        if(
+
+            getWeekNumber(itemDate) === currentWeek &&
+
+            itemDate.getFullYear() === currentYear
+
+        ){
+
+            if(item.type==="earnings"){
+
+                weekGross += item.amount;
+
+            }else{
+
+                weekFuel += item.amount;
+
+            }
+
+        }
+
+        if(
+
+            itemDate.getMonth()===currentMonth &&
+
+            itemDate.getFullYear()===currentYear
+
+        ){
+
+            if(item.type==="earnings"){
+
+                monthGross += item.amount;
+
+            }else{
+
+                monthFuel += item.amount;
+
+            }
+
+        }
+
+        const li =
+        document.createElement("li");
+
+        li.innerHTML = `
+
+        <div>
+
+            <strong>
+
+            ${item.type==="earnings" ? "💵 Earnings" : "⛽ Fuel"}
+
+            </strong>
+
+            <br>
+
+            $${item.amount.toFixed(2)}
+
+            <br>
+
+            <small>
+
+            ${item.date}
+
+            ${item.time}
+
+            </small>
+
+        </div>
 
         <button onclick="deleteItem(${index})">
+
         Delete
+
         </button>
+
         `;
 
         list.appendChild(li);
 
     });
 
+    // -------------------------
+    // Week Totals
+    // -------------------------
+
+    const weekGrossBox =
+    document.getElementById("weekGross");
+
+    if(weekGrossBox){
+
+        weekGrossBox.innerHTML =
+        "Gross: $" + weekGross.toFixed(2);
+
+    }
+
+    const weekFuelBox =
+    document.getElementById("weekFuel");
+
+    if(weekFuelBox){
+
+        weekFuelBox.innerHTML =
+        "Fuel: $" + weekFuel.toFixed(2);
+
+    }
+
+    const weekProfitBox =
+    document.getElementById("weekProfit");
+
+    if(weekProfitBox){
+
+        weekProfitBox.innerHTML =
+        "Profit: $" + (weekGross-weekFuel).toFixed(2);
+
+    }
+
+    // -------------------------
+    // Month Totals
+    // -------------------------
+
+    const monthGrossBox =
+    document.getElementById("monthGross");
+
+    if(monthGrossBox){
+
+        monthGrossBox.innerHTML =
+        "Gross: $" + monthGross.toFixed(2);
+
+    }
+
+    const monthFuelBox =
+    document.getElementById("monthFuel");
+
+    if(monthFuelBox){
+
+        monthFuelBox.innerHTML =
+        "Fuel: $" + monthFuel.toFixed(2);
+
+    }
+
+    const monthProfitBox =
+    document.getElementById("monthProfit");
+
+    if(monthProfitBox){
+
+        monthProfitBox.innerHTML =
+        "Profit: $" + (monthGross-monthFuel).toFixed(2);
+
+    }
+
 }
+
+
 
 // ===========================
 
 function addEarnings(){
 
-    const amount=parseFloat(
-    document.getElementById("earningsInput").value);
+    const amount = parseFloat(
 
-    if(isNaN(amount)||amount<=0){
+        document.getElementById("earningsInput").value
+
+    );
+
+    if(isNaN(amount) || amount <= 0){
+
         alert("Enter valid earnings.");
+
         return;
+
     }
 
-    earnings+=amount;
+    earnings += amount;
 
     history.unshift({
 
-        type:"earnings",
+        id: Date.now(),
 
-        amount:amount
+        type: "earnings",
+
+        amount: amount,
+
+        date: new Date().toISOString().split("T")[0],
+
+        time: new Date().toLocaleTimeString([],{
+
+            hour:"numeric",
+
+            minute:"2-digit"
+
+        })
 
     });
 
-    document.getElementById("earningsInput").value="";
+    document.getElementById("earningsInput").value = "";
+
+    saveData();
+
+}
+
+
+
+// ===========================
+
+function addFuel(){
+
+    const amount = parseFloat(
+
+        document.getElementById("fuelInput").value
+
+    );
+
+    if(isNaN(amount) || amount <= 0){
+
+        alert("Enter valid fuel amount.");
+
+        return;
+
+    }
+
+    fuel += amount;
+
+    history.unshift({
+
+        id: Date.now(),
+
+        type: "fuel",
+
+        amount: amount,
+
+        date: new Date().toISOString().split("T")[0],
+
+        time: new Date().toLocaleTimeString([],{
+
+            hour:"numeric",
+
+            minute:"2-digit"
+
+        })
+
+    });
+
+    document.getElementById("fuelInput").value = "";
 
     saveData();
 
 }
 
 // ===========================
+// Week Number Helper
+// ===========================
 
-function addFuel(){
+function getWeekNumber(date){
 
-    const amount=parseFloat(
-    document.getElementById("fuelInput").value);
+    const d = new Date(date);
 
-    if(isNaN(amount)||amount<=0){
-        alert("Enter valid fuel amount.");
-        return;
-    }
+    d.setHours(0,0,0,0);
 
-    fuel+=amount;
+    d.setDate(
 
-    history.unshift({
+        d.getDate() + 4 - (d.getDay() || 7)
 
-        type:"fuel",
+    );
 
-        amount:amount
+    const yearStart =
 
-    });
+    new Date(
 
-    document.getElementById("fuelInput").value="";
+        d.getFullYear(),
 
-    saveData();
+        0,
+
+        1
+
+    );
+
+    return Math.ceil(
+
+        (((d - yearStart) / 86400000) + 1) / 7
+
+    );
 
 }
 

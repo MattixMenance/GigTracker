@@ -10,9 +10,9 @@ content="width=device-width, initial-scale=1.0">
 
 <title>GigTracker</title>
 
-<link rel="stylesheet" href="style.css">
-
 <link rel="manifest" href="manifest.json">
+
+<link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -20,11 +20,13 @@ content="width=device-width, initial-scale=1.0">
 
 <div class="container">
 
-<h1>GigTracker</h1>
+<h1>📊 GigTracker</h1>
 
 <p class="subtitle">
 Driver Business Tracker
 </p>
+
+<!-- TODAY -->
 
 <div class="card">
 
@@ -44,6 +46,48 @@ Net Profit: $0.00
 
 </div>
 
+<!-- WEEK -->
+
+<div class="card">
+
+<h2>Week Totals</h2>
+
+<h3 id="weekGross">
+Gross: $0.00
+</h3>
+
+<h3 id="weekFuel">
+Fuel: $0.00
+</h3>
+
+<h2 id="weekProfit">
+Profit: $0.00
+</h2>
+
+</div>
+
+<!-- MONTH -->
+
+<div class="card">
+
+<h2>Month Totals</h2>
+
+<h3 id="monthGross">
+Gross: $0.00
+</h3>
+
+<h3 id="monthFuel">
+Fuel: $0.00
+</h3>
+
+<h2 id="monthProfit">
+Profit: $0.00
+</h2>
+
+</div>
+
+<!-- ADD EARNINGS -->
+
 <div class="card">
 
 <h2>Add Earnings</h2>
@@ -61,6 +105,8 @@ placeholder="Enter Earnings">
 </button>
 
 </div>
+
+<!-- ADD FUEL -->
 
 <div class="card">
 
@@ -80,6 +126,8 @@ placeholder="Enter Fuel Purchase">
 
 </div>
 
+<!-- ACTIVITY -->
+
 <div class="card">
 
 <h2>Today's Activity</h2>
@@ -90,9 +138,12 @@ placeholder="Enter Fuel Purchase">
 
 </div>
 
+<!-- RESET -->
+
 <div class="card">
 
-<button class="danger"
+<button
+class="danger"
 onclick="resetToday()">
 
 Reset Today

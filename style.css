@@ -7,11 +7,11 @@ font-family:Arial,Helvetica,sans-serif;
 
 body{
 background:#eef2f7;
-padding:25px;
+padding:20px;
 }
 
 .container{
-max-width:600px;
+max-width:650px;
 margin:auto;
 }
 
@@ -29,24 +29,47 @@ font-size:18px;
 }
 
 .card{
-background:#fff;
+background:white;
 padding:20px;
 margin-bottom:20px;
-border-radius:16px;
-box-shadow:0 5px 15px rgba(0,0,0,.12);
+border-radius:15px;
+box-shadow:0 4px 12px rgba(0,0,0,.15);
 }
 
 .card h2{
 margin-bottom:15px;
+color:#222;
+}
+
+h3{
+margin:8px 0;
+font-weight:normal;
+}
+
+#profit,
+#weekProfit,
+#monthProfit{
+font-size:28px;
+font-weight:bold;
+margin-top:12px;
+}
+
+.profit{
+color:#15803d;
+}
+
+.loss{
+color:#dc2626;
 }
 
 input{
 width:100%;
-padding:15px;
+padding:14px;
 font-size:18px;
+margin-top:10px;
+margin-bottom:15px;
 border:1px solid #ccc;
 border-radius:10px;
-margin-bottom:15px;
 }
 
 button{
@@ -56,45 +79,22 @@ font-size:20px;
 font-weight:bold;
 border:none;
 border-radius:10px;
-cursor:pointer;
-background:#2e7d32;
+background:#15803d;
 color:white;
+cursor:pointer;
 transition:.2s;
 }
 
 button:hover{
-background:#256628;
+background:#166534;
 }
 
 .danger{
-background:#c62828;
+background:#dc2626;
 }
 
 .danger:hover{
-background:#991b1b;
-}
-
-#earnings{
-color:#1b5e20;
-margin-bottom:10px;
-}
-
-#fuel{
-color:#e65100;
-margin-bottom:10px;
-}
-
-#profit{
-margin-top:10px;
-font-size:30px;
-}
-
-.profit{
-color:#1b5e20;
-}
-
-.loss{
-color:#c62828;
+background:#b91c1c;
 }
 
 ul{
@@ -105,16 +105,41 @@ li{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:12px;
+padding:14px;
 margin-bottom:10px;
-background:#f4f4f4;
-border-radius:8px;
+background:#f7f7f7;
+border-radius:10px;
+border-left:5px solid #15803d;
 font-size:18px;
 }
 
 li button{
 width:auto;
-padding:8px 14px;
-background:#d32f2f;
-font-size:16px;
+padding:8px 12px;
+font-size:14px;
+background:#dc2626;
+}
+
+li button:hover{
+background:#b91c1c;
+}
+
+@media(max-width:600px){
+
+h1{
+font-size:34px;
+}
+
+button{
+font-size:18px;
+}
+
+input{
+font-size:18px;
+}
+
+.card{
+padding:16px;
+}
+
 }

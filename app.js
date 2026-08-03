@@ -1,4 +1,15 @@
 // ===========================
+// GIGTRACKER CONFIGURATION
+// ===========================
+
+const APP_NAME = "GigTracker";
+
+const APP_SUBTITLE = "Driver Business Tracker";
+
+const APP_VERSION = "2.3";
+
+const APP_BUILD = "2026-08-02";
+// ===========================
 // GigTracker v2.0
 // ===========================
 
@@ -906,10 +917,22 @@ function deleteApp(index){
     renderManageApps();
 
 }
+function updateAppInfo(){
 
+    document.getElementById("appTitle").innerHTML =
+    "📊 " + APP_NAME;
+
+    document.getElementById("appSubtitle").innerHTML =
+    APP_SUBTITLE +
+    " v" +
+    APP_VERSION;
+
+}
 renderApps();
 
 renderManageApps();
+
+updateAppInfo();
 
 updateDisplay();
 

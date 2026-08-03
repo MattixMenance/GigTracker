@@ -1,7 +1,7 @@
 {
   "name": "GigTracker",
   "short_name": "GigTracker",
-  "description": "Driver Business Tracker",
+  "description": "Driver Business Tracker ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

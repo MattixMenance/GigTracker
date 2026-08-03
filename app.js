@@ -18,7 +18,26 @@ parseInt(localStorage.getItem("nextId")) || 1;
 // Selected Gig App
 // ===========================
 
+// ===========================
+// APP LIST
+// ===========================
+
+let apps =
+JSON.parse(localStorage.getItem("apps")) ||
+
+[
+"Spark",
+"Roadie",
+"Amazon Flex",
+"Shipt",
+"DoorDash",
+"Instacart"
+];
+
 let selectedApp =
+localStorage.getItem("selectedApp") ||
+
+apps[0];
 
 localStorage.getItem("selectedApp") || "Spark";
 // ===========================
@@ -603,6 +622,39 @@ function selectApp(app){
     });
 
 }
+function renderApps(){
+
+    const container =
+    document.getElementById("appButtons");
+
+    container.innerHTML = "";
+
+    apps.forEach(function(app){
+
+        const btn =
+        document.createElement("button");
+
+        btn.innerHTML = app;
+
+        btn.className = "appBtn";
+
+        if(app === selectedApp){
+
+            btn.classList.add("activeApp");
+
+        }
+
+        btn.onclick = function(){
+
+            selectApp(app);
+
+        };
+
+        container.appendChild(btn);
+
+    });
+
+}
 // ===========================
 
 function deleteItem(index){
@@ -715,13 +767,149 @@ function saveData(){
 localStorage.setItem(
 "nextId",
 nextId);
-   updateDisplay();
+   renderApps();
+
+updateDisplay();
 
 updateSelectedApp();
+
+
 
 }
 
 // ===========================
+
+renderApps();
+function renderManageApps(){
+
+    const box =
+    document.getElementById("manageApps");
+
+    if(!box) return;
+
+    box.innerHTML = "";
+
+    apps.forEach(function(app,index){
+
+        box.innerHTML += `
+
+<div class="manageRow">
+
+    <span>${app}</span>
+
+    <div>
+
+        <button onclick="renameApp(${index})">
+
+        ✏️
+
+        </button>
+
+        <button onclick="deleteApp(${index})">
+
+        🗑️
+
+        </button>
+
+    </div>
+
+</div>
+
+`;
+
+    });
+
+}
+
+function addApp(){
+
+    const input =
+    document.getElementById("newApp");
+
+    const name =
+    input.value.trim();
+
+    if(name==="") return;
+
+    apps.push(name);
+
+    localStorage.setItem(
+        "apps",
+        JSON.stringify(apps)
+    );
+
+    input.value="";
+
+    renderApps();
+
+    renderManageApps();
+
+}
+
+function renameApp(index){
+
+    const newName =
+    prompt("Rename App",apps[index]);
+
+    if(!newName) return;
+
+    apps[index] =
+    newName.trim();
+
+    localStorage.setItem(
+        "apps",
+        JSON.stringify(apps)
+    );
+
+    renderApps();
+
+    renderManageApps();
+
+}
+
+function deleteApp(index){
+
+    if(apps.length<=1){
+
+        alert("At least one app is required.");
+
+        return;
+
+    }
+
+    if(!confirm("Delete "+apps[index]+"?")){
+
+        return;
+
+    }
+
+    apps.splice(index,1);
+
+    if(!apps.includes(selectedApp)){
+
+        selectedApp=apps[0];
+
+        localStorage.setItem(
+            "selectedApp",
+            selectedApp
+        );
+
+    }
+
+    localStorage.setItem(
+        "apps",
+        JSON.stringify(apps)
+    );
+
+    renderApps();
+
+    renderManageApps();
+
+}
+
+renderApps();
+
+renderManageApps();
 
 updateDisplay();
 

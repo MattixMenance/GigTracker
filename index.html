@@ -85,14 +85,63 @@ Profit: $0.00
 </h2>
 
 </div>
+<div class="card">
 
+    <h2>👑 Best App Today</h2>
+
+    <h1 id="bestApp">
+        --
+    </h1>
+
+    <h3 id="bestAmount">
+        $0.00
+    </h3>
+
+    <p id="bestPercent">
+        0% of today's earnings
+    </p>
+
+</div>
+<div class="card">
+
+    <h2>🏆 App Earnings</h2>
+
+<div id="appSummary" class="appDashboard">
+
+</div>
+</div>
 <!-- ADD EARNINGS -->
 
 <div class="card">
 
 <h2>Add Earnings</h2>
+<h3>Select App</h3>
 
+<div id="appButtons">
+
+<button class="appBtn activeApp" onclick="selectApp('Spark')">Spark</button>
+
+<button class="appBtn" onclick="selectApp('Roadie')">Roadie</button>
+
+<button class="appBtn" onclick="selectApp('Amazon Flex')">Amazon Flex</button>
+
+<button class="appBtn" onclick="selectApp('Shipt')">Shipt</button>
+
+<button class="appBtn" onclick="selectApp('DoorDash')">DoorDash</button>
+
+<button class="appBtn" onclick="selectApp('Instacart')">Instacart</button>
+
+</div>
+
+<p id="selectedApp">
+
+Selected:
+
+<strong>Spark</strong>
+
+</p>
 <input
+
 id="earningsInput"
 type="number"
 step="0.01"

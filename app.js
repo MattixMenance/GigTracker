@@ -10,9 +10,50 @@ parseFloat(localStorage.getItem("fuel")) || 0;
 
 let history =
 JSON.parse(localStorage.getItem("history")) || [];
+// Transaction ID
 
+let nextId =
+parseInt(localStorage.getItem("nextId")) || 1;
+// ===========================
+// Selected Gig App
 // ===========================
 
+let selectedApp =
+
+localStorage.getItem("selectedApp") || "Spark";
+// ===========================
+
+// ===========================
+// Date Helpers
+// ===========================
+
+function today(){
+
+    return new Date().toISOString().split("T")[0];
+
+}
+
+// ===========================
+// Date Helpers
+// ===========================
+
+function today(){
+
+    return new Date().toISOString().split("T")[0];
+
+}
+
+function currentTime(){
+
+    return new Date().toLocaleTimeString([],{
+
+        hour:"numeric",
+
+        minute:"2-digit"
+
+    });
+
+}
 function updateDisplay(){
 
   // Recalculate totals from history
@@ -83,8 +124,123 @@ profitBox.innerHTML =
 
     const list =
     document.getElementById("history");
+// ===========================
+// App Earnings Dashboard
+// ===========================
 
-    list.innerHTML = "";
+// ===========================
+// APP LEADERBOARD
+// ===========================
+
+const appTotals = {};
+
+history.forEach(function(item){
+
+    if(item.type==="earnings"){
+
+        if(!appTotals[item.app]){
+
+            appTotals[item.app]=0;
+
+        }
+
+        appTotals[item.app]+=item.amount;
+
+    }
+
+});
+
+const sortedApps = Object.entries(appTotals).sort(function(a,b){
+
+    return b[1]-a[1];
+
+});
+// ===========================
+// BEST APP TODAY
+// ===========================
+
+const totalEarnings = earnings;
+
+if(sortedApps.length){
+
+    const best = sortedApps[0];
+
+    const percent =
+
+    ((best[1]/totalEarnings)*100).toFixed(0);
+
+    document.getElementById("bestApp").innerHTML =
+    "🥇 " + best[0];
+
+    document.getElementById("bestAmount").innerHTML =
+    "$" + best[1].toFixed(2);
+
+    document.getElementById("bestPercent").innerHTML =
+    percent + "% of today's earnings";
+
+}else{
+
+    document.getElementById("bestApp").innerHTML="--";
+
+    document.getElementById("bestAmount").innerHTML="$0.00";
+
+    document.getElementById("bestPercent").innerHTML="";
+
+}
+let appHTML="";
+
+const highest =
+sortedApps.length ? sortedApps[0][1] : 1;
+
+const medals=["🥇","🥈","🥉"];
+
+sortedApps.forEach(function(app,index){
+
+    const percent =
+    ((app[1]/highest)*100).toFixed(0);
+
+    appHTML += `
+
+<div class="appCard">
+
+    <div class="appTop">
+
+        <span>${medals[index] || "🏅"} ${app[0]}</span>
+
+        <span>$${app[1].toFixed(2)}</span>
+
+    </div>
+
+    <div class="progressBar">
+
+        <div class="progressFill"
+
+        style="width:${percent}%">
+
+        </div>
+
+    </div>
+
+    <div class="percent">
+
+        ${percent}% of top app
+
+    </div>
+
+</div>
+
+`;
+
+});
+
+if(appHTML===""){
+
+    appHTML="<p>No earnings yet.</p>";
+
+}
+
+document.getElementById("appSummary").innerHTML=appHTML;
+appHTML;    list.innerHTML = "";
 
     history.forEach(function(item,index){
 
@@ -155,37 +311,39 @@ profitBox.innerHTML =
         const li =
         document.createElement("li");
 
-        li.innerHTML = `
+li.innerHTML = `
 
-        <div>
+<div class="historyLeft">
 
-            <strong>
+<b>
 
-            ${item.type==="earnings" ? "💵 Earnings" : "⛽ Fuel"}
+${item.type==="earnings" ? "💵 " + item.app : "⛽ Fuel"}
 
-            </strong>
+</b>
 
-            <br>
+<br>
 
-            $${item.amount.toFixed(2)}
+$${item.amount.toFixed(2)}
 
-            <br>
+<br>
 
-            <small>
+<small>
 
-            ${item.date}
+${item.date}
 
-            ${item.time}
+&nbsp;
 
-            </small>
+${item.time}
 
-        </div>
+</small>
 
-<div style="margin-top:8px;">
+</div>
+
+<div class="historyRight">
 
 <button onclick="editItem(${index})">
 
-✏ Edit
+✏️ Edit
 
 </button>
 
@@ -196,6 +354,9 @@ profitBox.innerHTML =
 </button>
 
 </div>
+
+
+
         `;
 
         list.appendChild(li);
@@ -276,12 +437,12 @@ profitBox.innerHTML =
 
 // ===========================
 
+// ===========================
+
 function addEarnings(){
 
     const amount = parseFloat(
-
         document.getElementById("earningsInput").value
-
     );
 
     if(isNaN(amount) || amount <= 0){
@@ -292,25 +453,19 @@ function addEarnings(){
 
     }
 
-    earnings += amount;
-
     history.unshift({
 
-        id: Date.now(),
+        id: nextId++,
+
+        app: selectedApp,
 
         type: "earnings",
 
         amount: amount,
 
-        date: new Date().toISOString().split("T")[0],
+        date: today(),
 
-        time: new Date().toLocaleTimeString([],{
-
-            hour:"numeric",
-
-            minute:"2-digit"
-
-        })
+        time: currentTime()
 
     });
 
@@ -319,6 +474,7 @@ function addEarnings(){
     saveData();
 
 }
+  
 
 
 
@@ -405,7 +561,48 @@ function getWeekNumber(date){
 }
 
 // ===========================
+// ===========================
+function updateSelectedApp(){
 
+    document.getElementById("selectedApp").innerHTML =
+    "Selected: <strong>" + selectedApp + "</strong>";
+
+    document.querySelectorAll(".appBtn").forEach(function(btn){
+
+        btn.classList.remove("activeApp");
+
+        if(btn.innerText === selectedApp){
+
+            btn.classList.add("activeApp");
+        }
+
+    });
+
+}
+// ===========================
+
+function selectApp(app){
+
+    selectedApp = app;
+
+    localStorage.setItem("selectedApp",app);
+
+    document.getElementById("selectedApp").innerHTML =
+    "Selected: <strong>" + app + "</strong>";
+
+    document.querySelectorAll(".appBtn").forEach(function(btn){
+
+        btn.classList.remove("activeApp");
+
+        if(btn.innerText===app){
+
+            btn.classList.add("activeApp");
+
+        }
+
+    });
+
+}
 // ===========================
 
 function deleteItem(index){
@@ -515,11 +712,17 @@ function saveData(){
     localStorage.setItem(
     "history",
     JSON.stringify(history));
+localStorage.setItem(
+"nextId",
+nextId);
+   updateDisplay();
 
-    updateDisplay();
+updateSelectedApp();
 
 }
 
 // ===========================
 
 updateDisplay();
+
+updateSelectedApp();

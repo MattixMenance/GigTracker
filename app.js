@@ -927,6 +927,11 @@ function updateAppInfo(){
     " v" +
     APP_VERSION;
 
+    document.title =
+    APP_NAME +
+    " v" +
+    APP_VERSION;
+
 }
 renderApps();
 

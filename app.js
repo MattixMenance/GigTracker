@@ -763,6 +763,27 @@ function addEarnings(){
 
     }
 
+    // Capture date and time from the SAME local timestamp
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(now.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(now.getDate()).padStart(2, "0");
+
+    const date =
+        year + "-" + month + "-" + day;
+
+    const time =
+        now.toLocaleTimeString([],{
+            hour:"numeric",
+            minute:"2-digit"
+        });
+
     history.unshift({
 
         id: nextId++,
@@ -773,9 +794,9 @@ function addEarnings(){
 
         amount: amount,
 
-        date: today(),
+        date: date,
 
-        time: currentTime()
+        time: time
 
     });
 
@@ -783,8 +804,7 @@ function addEarnings(){
 
     saveData();
 
-}
-  
+}  
 
 
 
@@ -793,9 +813,7 @@ function addEarnings(){
 function addFuel(){
 
     const amount = parseFloat(
-
         document.getElementById("fuelInput").value
-
     );
 
     if(isNaN(amount) || amount <= 0){
@@ -808,6 +826,27 @@ function addFuel(){
 
     fuel += amount;
 
+    // Capture date and time from the SAME local timestamp
+    const now = new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(now.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(now.getDate()).padStart(2, "0");
+
+    const date =
+        year + "-" + month + "-" + day;
+
+    const time =
+        now.toLocaleTimeString([],{
+            hour:"numeric",
+            minute:"2-digit"
+        });
+
     history.unshift({
 
         id: Date.now(),
@@ -816,14 +855,9 @@ function addFuel(){
 
         amount: amount,
 
-date: today(),
-        time: new Date().toLocaleTimeString([],{
+        date: date,
 
-            hour:"numeric",
-
-            minute:"2-digit"
-
-        })
+        time: time
 
     });
 
@@ -832,7 +866,6 @@ date: today(),
     saveData();
 
 }
-
 // ===========================
 // Week Number Helper
 // ===========================
@@ -1278,50 +1311,5 @@ function exportGigTrackerData(){
         historyData.length +
         " transactions exported successfully."
     );
-
-}
-function fixRoadieDate() {
-
-    let history =
-        JSON.parse(localStorage.getItem("history")) || [];
-
-    let fixed = false;
-
-    history.forEach(function(item) {
-
-        if (
-            item.type === "earnings" &&
-            item.app === "Roadie" &&
-            Number(item.amount) === 6.50 &&
-            item.date === "2026-08-08"
-        ) {
-
-            item.date = "2026-08-07";
-
-            fixed = true;
-        }
-
-    });
-
-    localStorage.setItem(
-        "history",
-        JSON.stringify(history)
-    );
-
-    if (fixed) {
-
-        alert(
-            "Roadie $6.50 date corrected to August 7, 2026."
-        );
-
-        location.reload();
-
-    } else {
-
-        alert(
-            "The Roadie $6.50 transaction was not found."
-        );
-
-    }
 
 }

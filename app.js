@@ -1280,3 +1280,48 @@ function exportGigTrackerData(){
     );
 
 }
+function fixRoadieDate() {
+
+    let history =
+        JSON.parse(localStorage.getItem("history")) || [];
+
+    let fixed = false;
+
+    history.forEach(function(item) {
+
+        if (
+            item.type === "earnings" &&
+            item.app === "Roadie" &&
+            Number(item.amount) === 6.50 &&
+            item.date === "2026-08-08"
+        ) {
+
+            item.date = "2026-08-07";
+
+            fixed = true;
+        }
+
+    });
+
+    localStorage.setItem(
+        "history",
+        JSON.stringify(history)
+    );
+
+    if (fixed) {
+
+        alert(
+            "Roadie $6.50 date corrected to August 7, 2026."
+        );
+
+        location.reload();
+
+    } else {
+
+        alert(
+            "The Roadie $6.50 transaction was not found."
+        );
+
+    }
+
+}

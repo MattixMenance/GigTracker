@@ -59,20 +59,18 @@ localStorage.getItem("selectedApp") || "Spark";
 
 function today(){
 
-    return new Date().toISOString().split("T")[0];
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    console.log("GIGTRACKER DATE TEST:", now.toString());
+console.log("GIGTRACKER TODAY:", year + "-" + month + "-" + day);
+
+    return year + "-" + month + "-" + day;
 
 }
-
-// ===========================
-// Date Helpers
-// ===========================
-
-function today(){
-
-    return new Date().toISOString().split("T")[0];
-
-}
-
 function currentTime(){
 
     return new Date().toLocaleTimeString([],{
@@ -86,227 +84,143 @@ function currentTime(){
 }
 function updateDisplay(){
 
-  // Recalculate totals from history
+    // ===========================
+    // DATE SETUP
+    // ===========================
 
-earnings = 0;
-fuel = 0;
+    const now = new Date();
 
-history.forEach(function(item){
+    const todayDate =
+        today();
 
-    if(item.type==="earnings"){
+    // Monday = start of week
+    const dayOfWeek = now.getDay();
 
-        earnings += item.amount;
+    const daysFromMonday =
+        dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-    }else{
+    const weekStart =
+        new Date(now);
 
-        fuel += item.amount;
+    weekStart.setDate(
+        now.getDate() - daysFromMonday
+    );
 
-    }
+    weekStart.setHours(0,0,0,0);
 
-});
+    // Start of next week
+    const weekEnd =
+        new Date(weekStart);
 
-const profit = earnings - fuel;
+    weekEnd.setDate(
+        weekStart.getDate() + 7
+    );
 
-document.getElementById("earnings").innerHTML =
-"Earnings: $" + earnings.toFixed(2);
+    // Start of current month
+    const monthStart =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+        );
 
-document.getElementById("fuel").innerHTML =
-"Fuel: $" + fuel.toFixed(2);
+    // Start of next month
+    const monthEnd =
+        new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            1
+        );
 
-const profitBox =
-document.getElementById("profit");
 
-profitBox.innerHTML =
-"Net Profit: $" + profit.toFixed(2);
+    // ===========================
+    // TODAY TOTALS
+    // ===========================
 
-    if(profit >= 0){
+    let todayGross = 0;
+    let todayFuel = 0;
 
-        profitBox.className = "profit";
 
-    }else{
-
-        profitBox.className = "loss";
-
-    }
-
-    // -------------------------
-    // Calculate Week / Month Totals
-    // -------------------------
+    // ===========================
+    // WEEK TOTALS
+    // ===========================
 
     let weekGross = 0;
     let weekFuel = 0;
 
+
+    // ===========================
+    // MONTH TOTALS
+    // ===========================
+
     let monthGross = 0;
     let monthFuel = 0;
 
-    const now = new Date();
 
-    const currentWeek =
-    getWeekNumber(now);
+    // ===========================
+    // APP EARNINGS
+    // ===========================
 
-    const currentMonth =
-    now.getMonth();
+    const appTotals = {};
 
-    const currentYear =
-    now.getFullYear();
 
-    // -------------------------
+    // ===========================
+    // PROCESS HISTORY
+    // ===========================
 
-    const list =
-    document.getElementById("history");
-// ===========================
-// App Earnings Dashboard
-// ===========================
-
-// ===========================
-// APP LEADERBOARD
-// ===========================
-
-const appTotals = {};
-
-history.forEach(function(item){
-
-    if(item.type==="earnings"){
-
-        if(!appTotals[item.app]){
-
-            appTotals[item.app]=0;
-
-        }
-
-        appTotals[item.app]+=item.amount;
-
-    }
-
-});
-
-const sortedApps = Object.entries(appTotals).sort(function(a,b){
-
-    return b[1]-a[1];
-
-});
-// ===========================
-// BEST APP TODAY
-// ===========================
-
-const totalEarnings = earnings;
-
-if(sortedApps.length){
-
-    const best = sortedApps[0];
-
-    const percent =
-
-    ((best[1]/totalEarnings)*100).toFixed(0);
-
-    document.getElementById("bestApp").innerHTML =
-    "🥇 " + best[0];
-
-    document.getElementById("bestAmount").innerHTML =
-    "$" + best[1].toFixed(2);
-
-    document.getElementById("bestPercent").innerHTML =
-    percent + "% of today's earnings";
-
-}else{
-
-    document.getElementById("bestApp").innerHTML="--";
-
-    document.getElementById("bestAmount").innerHTML="$0.00";
-
-    document.getElementById("bestPercent").innerHTML="";
-
-}
-let appHTML="";
-
-const highest =
-sortedApps.length ? sortedApps[0][1] : 1;
-
-const medals=["🥇","🥈","🥉"];
-
-sortedApps.forEach(function(app,index){
-
-    const percent =
-    ((app[1]/highest)*100).toFixed(0);
-
-    appHTML += `
-
-<div class="appCard">
-
-    <div class="appTop">
-
-        <span>${medals[index] || "🏅"} ${app[0]}</span>
-
-        <span>$${app[1].toFixed(2)}</span>
-
-    </div>
-
-    <div class="progressBar">
-
-        <div class="progressFill"
-
-        style="width:${percent}%">
-
-        </div>
-
-    </div>
-
-    <div class="percent">
-
-        ${percent}% of top app
-
-    </div>
-
-</div>
-
-`;
-
-});
-
-if(appHTML===""){
-
-    appHTML="<p>No earnings yet.</p>";
-
-}
-
-document.getElementById("appSummary").innerHTML=appHTML;
-appHTML;    list.innerHTML = "";
-
-    history.forEach(function(item,index){
+    history.forEach(function(item){
 
         // Backward compatibility
         if(!item.date){
 
-            item.date =
-            now.toISOString().split("T")[0];
+            item.date = todayDate;
 
         }
 
         if(!item.time){
 
             item.time =
-            now.toLocaleTimeString([],{
-
-                hour:"numeric",
-
-                minute:"2-digit"
-
-            });
+                now.toLocaleTimeString([],{
+                    hour:"numeric",
+                    minute:"2-digit"
+                });
 
         }
 
+
         const itemDate =
-        new Date(item.date);
+            new Date(item.date + "T00:00:00");
+
+
+        // -------------------------
+        // TODAY
+        // -------------------------
+
+        if(item.date === todayDate){
+
+            if(item.type === "earnings"){
+
+                todayGross += item.amount;
+
+            }else{
+
+                todayFuel += item.amount;
+
+            }
+
+        }
+
+
+        // -------------------------
+        // WEEK
+        // -------------------------
 
         if(
-
-            getWeekNumber(itemDate) === currentWeek &&
-
-            itemDate.getFullYear() === currentYear
-
+            itemDate >= weekStart &&
+            itemDate < weekEnd
         ){
 
-            if(item.type==="earnings"){
+            if(item.type === "earnings"){
 
                 weekGross += item.amount;
 
@@ -318,15 +232,17 @@ appHTML;    list.innerHTML = "";
 
         }
 
+
+        // -------------------------
+        // MONTH
+        // -------------------------
+
         if(
-
-            itemDate.getMonth()===currentMonth &&
-
-            itemDate.getFullYear()===currentYear
-
+            itemDate >= monthStart &&
+            itemDate < monthEnd
         ){
 
-            if(item.type==="earnings"){
+            if(item.type === "earnings"){
 
                 monthGross += item.amount;
 
@@ -338,131 +254,495 @@ appHTML;    list.innerHTML = "";
 
         }
 
+
+        // -------------------------
+        // TODAY'S APP EARNINGS
+        // -------------------------
+
+        if(
+            item.type === "earnings" &&
+            item.date === todayDate
+        ){
+
+            if(!appTotals[item.app]){
+
+                appTotals[item.app] = 0;
+
+            }
+
+            appTotals[item.app] += item.amount;
+
+        }
+
+    });
+
+
+    // ===========================
+    // TODAY TOTALS
+    // ===========================
+
+    earnings = todayGross;
+
+    fuel = todayFuel;
+
+    const profit =
+        todayGross - todayFuel;
+
+
+    document.getElementById("earnings").innerHTML =
+        "Earnings: $" +
+        todayGross.toFixed(2);
+
+
+    document.getElementById("fuel").innerHTML =
+        "Fuel: $" +
+        todayFuel.toFixed(2);
+
+
+    const profitBox =
+        document.getElementById("profit");
+
+
+    profitBox.innerHTML =
+        "Net Profit: $" +
+        profit.toFixed(2);
+
+
+    if(profit >= 0){
+
+        profitBox.className =
+            "profit";
+
+    }else{
+
+        profitBox.className =
+            "loss";
+
+    }
+
+
+    // ===========================
+    // HISTORY DISPLAY
+    // ===========================
+
+    const list =
+        document.getElementById("history");
+
+    list.innerHTML = "";
+
+
+    history.forEach(function(item,index){
+
         const li =
-        document.createElement("li");
-
-li.innerHTML = `
-
-<div class="historyLeft">
-
-<b>
-
-${item.type==="earnings" ? "💵 " + item.app : "⛽ Fuel"}
-
-</b>
-
-<br>
-
-$${item.amount.toFixed(2)}
-
-<br>
-
-<small>
-
-${item.date}
-
-&nbsp;
-
-${item.time}
-
-</small>
-
-</div>
-
-<div class="historyRight">
-
-<button onclick="editItem(${index})">
-
-✏️ Edit
-
-</button>
-
-<button onclick="deleteItem(${index})">
-
-🗑 Delete
-
-</button>
-
-</div>
+            document.createElement("li");
 
 
+        li.innerHTML = `
+
+        <div class="historyLeft">
+
+            <b>
+                ${
+                    item.type === "earnings"
+                    ? "💵 " + item.app
+                    : "⛽ Fuel"
+                }
+            </b>
+
+            <br>
+
+            $${item.amount.toFixed(2)}
+
+            <br>
+
+            <small>
+                ${item.date}
+                &nbsp;
+                ${item.time}
+            </small>
+
+        </div>
+
+
+        <div class="historyRight">
+
+            <button onclick="editItem(${index})">
+                ✏️ Edit
+            </button>
+
+            <button onclick="deleteItem(${index})">
+                🗑 Delete
+            </button>
+
+        </div>
 
         `;
+
 
         list.appendChild(li);
 
     });
 
-    // -------------------------
-    // Week Totals
-    // -------------------------
+
+    // ===========================
+    // WEEK DISPLAY
+    // ===========================
 
     const weekGrossBox =
-    document.getElementById("weekGross");
+        document.getElementById("weekGross");
 
     if(weekGrossBox){
 
         weekGrossBox.innerHTML =
-        "Gross: $" + weekGross.toFixed(2);
+            "Gross: $" +
+            weekGross.toFixed(2);
 
     }
 
+
     const weekFuelBox =
-    document.getElementById("weekFuel");
+        document.getElementById("weekFuel");
 
     if(weekFuelBox){
 
         weekFuelBox.innerHTML =
-        "Fuel: $" + weekFuel.toFixed(2);
+            "Fuel: $" +
+            weekFuel.toFixed(2);
 
     }
 
+
     const weekProfitBox =
-    document.getElementById("weekProfit");
+        document.getElementById("weekProfit");
 
     if(weekProfitBox){
 
         weekProfitBox.innerHTML =
-        "Profit: $" + (weekGross-weekFuel).toFixed(2);
+            "Profit: $" +
+            (weekGross - weekFuel).toFixed(2);
 
     }
 
-    // -------------------------
-    // Month Totals
-    // -------------------------
+
+    // ===========================
+    // MONTH DISPLAY
+    // ===========================
 
     const monthGrossBox =
-    document.getElementById("monthGross");
+        document.getElementById("monthGross");
 
     if(monthGrossBox){
 
         monthGrossBox.innerHTML =
-        "Gross: $" + monthGross.toFixed(2);
+            "Gross: $" +
+            monthGross.toFixed(2);
 
     }
 
+
     const monthFuelBox =
-    document.getElementById("monthFuel");
+        document.getElementById("monthFuel");
 
     if(monthFuelBox){
 
         monthFuelBox.innerHTML =
-        "Fuel: $" + monthFuel.toFixed(2);
+            "Fuel: $" +
+            monthFuel.toFixed(2);
 
     }
 
+
     const monthProfitBox =
-    document.getElementById("monthProfit");
+        document.getElementById("monthProfit");
 
     if(monthProfitBox){
 
         monthProfitBox.innerHTML =
-        "Profit: $" + (monthGross-monthFuel).toFixed(2);
+            "Profit: $" +
+            (monthGross - monthFuel).toFixed(2);
+
+    }
+
+
+    // ===========================
+    // APP LEADERBOARD
+    // ===========================
+
+    const sortedApps =
+        Object.entries(appTotals)
+        .sort(function(a,b){
+
+            return b[1] - a[1];
+
+        });
+
+
+    // ===========================
+    // BEST APP TODAY
+    // ===========================
+
+    const totalEarnings =
+        todayGross;
+
+
+    if(sortedApps.length){
+
+        const best =
+            sortedApps[0];
+
+
+        const percent =
+            totalEarnings > 0
+            ? ((best[1] / totalEarnings) * 100).toFixed(0)
+            : 0;
+
+
+        document.getElementById("bestApp").innerHTML =
+            "🥇 " + best[0];
+
+
+        document.getElementById("bestAmount").innerHTML =
+            "$" + best[1].toFixed(2);
+
+
+        document.getElementById("bestPercent").innerHTML =
+            percent +
+            "% of today's earnings";
+
+    }else{
+
+        document.getElementById("bestApp").innerHTML =
+            "--";
+
+        document.getElementById("bestAmount").innerHTML =
+            "$0.00";
+
+        document.getElementById("bestPercent").innerHTML =
+            "0% of today's earnings";
+
+    }
+
+// ===========================
+// DAILY RESULTS
+// ===========================
+
+const dailyResults =
+    document.getElementById("dailyResults");
+
+let dailyHTML = "";
+
+// Group transactions by date
+const dailyTotals = {};
+
+history.forEach(function(item){
+
+if(!item.date){
+    return;
+}
+    // Only show the current week
+    const itemDate =
+        new Date(item.date + "T00:00:00");
+
+    if(
+        itemDate >= weekStart &&
+        itemDate < weekEnd
+    ){
+
+        if(!dailyTotals[item.date]){
+
+            dailyTotals[item.date] = {
+                earnings: 0,
+                fuel: 0
+            };
+
+        }
+
+        if(item.type === "earnings"){
+
+            dailyTotals[item.date].earnings
+                += Number(item.amount) || 0;
+
+        }else if(item.type === "fuel"){
+
+            dailyTotals[item.date].fuel
+                += Number(item.amount) || 0;
+
+        }
+
+    }
+
+});
+
+
+// Sort dates oldest → newest
+const dailyDates =
+    Object.keys(dailyTotals).sort();
+
+
+// Build daily cards
+dailyDates.forEach(function(date){
+
+    const totals =
+        dailyTotals[date];
+
+    const net =
+        totals.earnings - totals.fuel;
+
+console.log("DAILY RESULT DATE:", date);
+
+const displayDate =
+    new Date(date + "T12:00:00");
+    const dayName =
+        displayDate.toLocaleDateString(
+            "en-US",
+            { weekday: "long" }
+        );
+
+    const formattedDate =
+        displayDate.toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric"
+            }
+        );
+
+
+    dailyHTML += `
+
+        <div class="dailyCard">
+
+            <h3>
+                📅 ${dayName} — ${formattedDate}
+            </h3>
+
+            <div>
+                Earnings:
+                <strong>
+                    $${totals.earnings.toFixed(2)}
+                </strong>
+            </div>
+
+            <div>
+                Fuel:
+                <strong>
+                    $${totals.fuel.toFixed(2)}
+                </strong>
+            </div>
+
+            <div>
+                Net:
+                <strong>
+                    $${net.toFixed(2)}
+                </strong>
+            </div>
+
+        </div>
+
+    `;
+
+});
+
+
+// Nothing recorded
+if(dailyHTML === ""){
+
+    dailyHTML =
+        "<p>No daily results yet.</p>";
+
+}
+
+
+// Display results
+if(dailyResults){
+
+    dailyResults.innerHTML =
+        dailyHTML;
+
+}    // ===========================
+    // APP SUMMARY
+    // ===========================
+
+    let appHTML = "";
+
+    const highest =
+        sortedApps.length
+        ? sortedApps[0][1]
+        : 1;
+
+
+    const medals =
+        ["🥇","🥈","🥉"];
+
+
+    sortedApps.forEach(function(app,index){
+
+        const percent =
+            ((app[1] / highest) * 100)
+            .toFixed(0);
+
+
+        appHTML += `
+
+        <div class="appCard">
+
+            <div class="appTop">
+
+                <span>
+                    ${medals[index] || "🏅"}
+                    ${app[0]}
+                </span>
+
+                <span>
+                    $${app[1].toFixed(2)}
+                </span>
+
+            </div>
+
+
+            <div class="progressBar">
+
+                <div
+                    class="progressFill"
+                    style="width:${percent}%">
+                </div>
+
+            </div>
+
+
+            <div class="percent">
+
+                ${percent}% of top app
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+
+    if(appHTML === ""){
+
+        appHTML =
+            "<p>No earnings yet.</p>";
+
+    }
+
+
+    const appSummary =
+        document.getElementById("appSummary");
+
+
+    if(appSummary){
+
+        appSummary.innerHTML =
+            appHTML;
 
     }
 
 }
-
 
 
 // ===========================
@@ -536,8 +816,7 @@ function addFuel(){
 
         amount: amount,
 
-        date: new Date().toISOString().split("T")[0],
-
+date: today(),
         time: new Date().toLocaleTimeString([],{
 
             hour:"numeric",
@@ -942,3 +1221,62 @@ updateAppInfo();
 updateDisplay();
 
 updateSelectedApp();
+// ===========================
+// EXPORT GIGTRACKER DATA
+// ===========================
+
+function exportGigTrackerData(){
+
+    const historyData =
+        JSON.parse(
+            localStorage.getItem("history") || "[]"
+        );
+
+    if(historyData.length === 0){
+
+        alert("No transaction data found.");
+
+        return;
+
+    }
+
+    const backup = {
+        app: "GigTracker",
+        exportedAt: new Date().toString(),
+        history: historyData
+    };
+
+    const json =
+        JSON.stringify(backup, null, 2);
+
+    const blob =
+        new Blob(
+            [json],
+            { type: "application/json" }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        "GigTracker_Backup.json";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    alert(
+        historyData.length +
+        " transactions exported successfully."
+    );
+
+}

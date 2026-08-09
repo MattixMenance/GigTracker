@@ -1058,20 +1058,86 @@ function editItem(index){
 
 function resetToday(){
 
-    if(!confirm("Reset today's totals?")){
+    if(!confirm(
+        "Reset today's transactions?\n\n" +
+        "Only TODAY'S transactions will be removed.\n\n" +
+        "Previous days will remain in your Week and Month totals.\n\n" +
+        "Continue?"
+    )){
         return;
     }
 
-    earnings=0;
+    const now = new Date();
 
-    fuel=0;
+    const year =
+        now.getFullYear();
 
-    history=[];
+    const month =
+        String(now.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(now.getDate()).padStart(2, "0");
+
+    const todayDate =
+        year + "-" + month + "-" + day;
+
+    // Keep everything that is NOT today
+    history = history.filter(function(item){
+
+        return item.date !== todayDate;
+
+    });
+
+    // Rebuild totals from remaining history
+    earnings = 0;
+
+    fuel = 0;
+
+    history.forEach(function(item){
+
+        const amount =
+            Number(item.amount) || 0;
+
+        if(item.type === "earnings"){
+
+            earnings += amount;
+
+        }
+
+        else if(item.type === "fuel"){
+
+            fuel += amount;
+
+        }
+
+    });
+
+    // Rebuild next ID safely
+    let highestId = 0;
+
+    history.forEach(function(item){
+
+        const id =
+            Number(item.id) || 0;
+
+        if(id > highestId){
+
+            highestId = id;
+
+        }
+
+    });
+
+    nextId = highestId + 1;
 
     saveData();
 
-}
+    alert(
+        "Today's transactions were reset.\n\n" +
+        "Previous days remain saved."
+    );
 
+}
 // ===========================
 
 function saveData(){
@@ -1274,13 +1340,34 @@ function exportGigTrackerData(){
     }
 
     const backup = {
+
         app: "GigTracker",
-        exportedAt: new Date().toString(),
-        history: historyData
+
+        version: "2.3",
+
+        exportedAt:
+            new Date().toString(),
+
+        earnings:
+            earnings,
+
+        fuel:
+            fuel,
+
+        nextId:
+            nextId,
+
+        history:
+            historyData
+
     };
 
     const json =
-        JSON.stringify(backup, null, 2);
+        JSON.stringify(
+            backup,
+            null,
+            2
+        );
 
     const blob =
         new Blob(
@@ -1294,22 +1381,283 @@ function exportGigTrackerData(){
     const link =
         document.createElement("a");
 
-    link.href = url;
+    link.href =
+        url;
 
     link.download =
         "GigTracker_Backup.json";
 
-    document.body.appendChild(link);
+    document.body.appendChild(
+        link
+    );
 
     link.click();
 
-    document.body.removeChild(link);
+    document.body.removeChild(
+        link
+    );
 
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(
+        url
+    );
 
     alert(
         historyData.length +
         " transactions exported successfully."
     );
 
+}
+// ===========================
+// RESTORE BACKUP
+// ===========================
+
+function restoreGigTrackerData() {
+
+    const fileInput =
+        document.getElementById("restoreFile");
+
+    if (!fileInput.files.length) {
+
+        alert("Please select a GigTracker backup file.");
+
+        return;
+    }
+
+    const file = fileInput.files[0];
+
+    if (!file.name.toLowerCase().endsWith(".json")) {
+
+        alert("Please select a JSON backup file.");
+
+        fileInput.value = "";
+
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+
+        let backup;
+
+        try {
+
+            backup =
+                JSON.parse(event.target.result);
+
+        } catch(error) {
+
+            alert(
+                "The selected file is not valid JSON."
+            );
+
+            fileInput.value = "";
+
+            return;
+        }
+
+        // -------------------------
+        // VALIDATE BACKUP
+        // -------------------------
+
+        if (
+            !backup ||
+            backup.app !== "GigTracker" ||
+            !Array.isArray(backup.history)
+        ) {
+
+            alert(
+                "This is not a valid GigTracker backup."
+            );
+
+            fileInput.value = "";
+
+            return;
+        }
+
+        // -------------------------
+        // FIRST CONFIRMATION
+        // -------------------------
+
+        const firstConfirm =
+            confirm(
+                "⚠️ RESTORE GIGTRACKER BACKUP?\n\n" +
+                "This will replace the current GigTracker " +
+                "transaction history with the selected backup.\n\n" +
+                "Your current data will be overwritten.\n\n" +
+                "Are you sure you want to continue?"
+            );
+
+        if (!firstConfirm) {
+
+            fileInput.value = "";
+
+            return;
+        }
+
+        // -------------------------
+        // SECOND CONFIRMATION
+        // -------------------------
+
+        const secondConfirm =
+            confirm(
+                "🚨 FINAL WARNING 🚨\n\n" +
+                "Your CURRENT GigTracker data will be replaced " +
+                "by this backup.\n\n" +
+                "Only continue if you have a backup of your " +
+                "current data.\n\n" +
+                "RESTORE THIS BACKUP?"
+            );
+
+        if (!secondConfirm) {
+
+            fileInput.value = "";
+
+            return;
+        }
+
+        // -------------------------
+        // AUTOMATIC SAFETY BACKUP
+        // -------------------------
+
+        const currentHistory =
+            JSON.parse(
+                localStorage.getItem("history") || "[]"
+            );
+
+        if (currentHistory.length > 0) {
+
+            const safetyBackup = {
+
+                app: "GigTracker",
+
+                exportedAt:
+                    new Date().toString(),
+
+                type:
+                    "Automatic Safety Backup",
+
+                history:
+                    currentHistory
+
+            };
+
+            const safetyJson =
+                JSON.stringify(
+                    safetyBackup,
+                    null,
+                    2
+                );
+
+            const safetyBlob =
+                new Blob(
+                    [safetyJson],
+                    { type: "application/json" }
+                );
+
+            const safetyUrl =
+                URL.createObjectURL(
+                    safetyBlob
+                );
+
+            const safetyLink =
+                document.createElement("a");
+
+            safetyLink.href =
+                safetyUrl;
+
+            safetyLink.download =
+                "GigTracker_PreRestore_Safety_Backup.json";
+
+            document.body.appendChild(
+                safetyLink
+            );
+
+            safetyLink.click();
+
+            document.body.removeChild(
+                safetyLink
+            );
+
+            URL.revokeObjectURL(
+                safetyUrl
+            );
+        }
+
+        // -------------------------
+        // RESTORE HISTORY
+        // -------------------------
+
+        history =
+            backup.history;
+
+        // -------------------------
+        // REBUILD TOTALS
+        // -------------------------
+
+        earnings = 0;
+
+        fuel = 0;
+
+        history.forEach(function(item) {
+
+            const amount =
+                Number(item.amount) || 0;
+
+            if(item.type === "earnings") {
+
+                earnings += amount;
+
+            }
+
+            else if(item.type === "fuel") {
+
+                fuel += amount;
+
+            }
+
+        });
+
+        // -------------------------
+        // REBUILD NEXT ID
+        // -------------------------
+
+        let highestId = 0;
+
+        history.forEach(function(item) {
+
+            const id =
+                Number(item.id) || 0;
+
+            if(id > highestId) {
+
+                highestId = id;
+
+            }
+
+        });
+
+        nextId =
+            highestId + 1;
+
+        // -------------------------
+        // SAVE RESTORED DATA
+        // -------------------------
+
+        saveData();
+
+        fileInput.value = "";
+
+        alert(
+            "✅ GigTracker backup restored successfully.\n\n" +
+            history.length +
+            " transactions restored.\n\n" +
+            "Your totals have been rebuilt from the backup."
+        );
+
+        location.reload();
+
+    };
+
+    reader.readAsText(file);
 }

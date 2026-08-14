@@ -6,7 +6,7 @@ const APP_NAME = "GigTracker";
 
 const APP_SUBTITLE = "Driver Business Tracker";
 
-const APP_VERSION = "2.3";
+const APP_VERSION = "2.4";
 
 const APP_BUILD = "2026-08-02";
 // ===========================
@@ -1364,7 +1364,7 @@ function exportGigTrackerData(){
 
         app: "GigTracker",
 
-        version: "2.3",
+        version: "2.4",
 
         exportedAt:
             new Date().toString(),

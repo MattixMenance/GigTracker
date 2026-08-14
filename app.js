@@ -748,7 +748,28 @@ if(dailyResults){
 // ===========================
 
 // ===========================
+function toggleHistory(button){
 
+    const historyList =
+        document.getElementById("history");
+
+    if(historyList.style.display === "none"){
+
+        historyList.style.display = "block";
+
+        button.textContent =
+            "Today's Activity ▲";
+
+    }else{
+
+        historyList.style.display = "none";
+
+        button.textContent =
+            "Today's Activity ▼";
+
+    }
+
+}
 function addEarnings(){
 
     const amount = parseFloat(

@@ -197,12 +197,17 @@ placeholder="Enter Fuel Purchase">
 
 <div class="card">
 
-<h2>Today's Activity</h2>
+<button
+    type="button"
+    onclick="toggleHistory(this)">
+    Today's Activity ▼
+</button>
 
-<ul id="history">
+<ul
+    id="history"
+    style="display:none;">
 
 </ul>
-
 </div>
 
 <!-- RESET -->

@@ -129,10 +129,12 @@ h1{
 font-size:34px;
 }
 
-button{
-font-size:18px;
+#history li button{
+font-size:14px;
+padding:6px 8px;
+width:auto;
+flex-shrink:0;
 }
-
 input{
 font-size:18px;
 }
